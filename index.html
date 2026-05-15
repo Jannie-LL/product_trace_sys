@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>食品溯源查询</title>
+  <style>
+    body { font-family: "微软雅黑", sans-serif; max-width: 600px; margin: 30px auto; padding: 0 20px; }
+    .card { border: 1px solid #eee; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px #00000010; }
+    .item { margin: 10px 0; line-height: 1.6; }
+    .label { color: #666; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>食品溯源信息</h1>
+    <div id="info"></div>
+  </div>
+
+  <script>
+    // 1. 读取 URL 中的 id 参数
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+    const infoDiv = document.getElementById('info');
+
+    if (!productId) {
+      infoDiv.innerHTML = '<p style="color:red">请通过带 id 参数的链接或二维码访问</p>';
+    } else {
+      // 2. 加载 products.json 数据
+      fetch('products.json')
+        .then(res => res.json())
+        .then(data => {
+          // 3. 匹配对应 id 的食品信息
+          const product = data.find(p => p.id === productId);
+          if (product) {
+            infoDiv.innerHTML = `
+              <div class="item"><span class="label">产品ID：</span>${product.id}</div>
+              <div class="item"><span class="label">产品名称：</span>${product.name}</div>
+              <div class="item"><span class="label">产地：</span>${product.origin}</div>
+              <div class="item"><span class="label">生产批次：</span>${product.batch}</div>
+              <div class="item"><span class="label">检测结果：</span>${product.testResult}</div>
+              <div class="item"><span class="label">物流过程：</span>${product.logistics}</div>
+            `;
+          } else {
+            infoDiv.innerHTML = `<p style="color:red">未找到ID为 ${productId} 的产品信息</p>`;
+          }
+        })
+        .catch(err => {
+          infoDiv.innerHTML = `<p style="color:red">加载数据失败：${err.message}</p>`;
+        });
+    }
+  </script>
+</body>
+</html>
